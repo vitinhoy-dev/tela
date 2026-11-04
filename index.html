@@ -155,8 +155,14 @@ const ICE_SERVERS = [
    PeerJS. Ele só troca a "apresentação" entre os navegadores; o vídeo
    vai direto de um computador para o outro. Dá para trocar via URL:
    ?peerhost=localhost&peerport=9000&peersecure=0 */
+const SIGNAL_HOST = ""; // ex.: "tela-sinal.onrender.com" (servidor próprio). Vazio = servidor público do PeerJS.
 const qs = new URLSearchParams(location.search);
 const PEER_OPTS = { config: { iceServers: ICE_SERVERS }, debug: 1 };
+if (SIGNAL_HOST && !qs.get("peerhost")) {
+  Object.assign(PEER_OPTS, { host: SIGNAL_HOST, port: 443, secure: true, path: "/" });
+  // O plano grátis do Render "dorme" sem uso; isso acorda o servidor assim que a página abre.
+  fetch("https://" + SIGNAL_HOST + "/").catch(() => {});
+}
 if (qs.get("peerhost")) {
   PEER_OPTS.host = qs.get("peerhost");
   PEER_OPTS.port = Number(qs.get("peerport") || 443);
